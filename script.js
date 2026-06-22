@@ -118,3 +118,75 @@ if (navToggle) {
     document.body.classList.toggle('nav-open');
   });
 }
+
+// === Slider videos: play on hover (desktop) / tap (mobile) + sound toggle ===
+(() => {
+  const cases = document.querySelectorAll('.case');
+  const coarse = matchMedia('(hover: none)').matches;
+
+  const SPEAKER_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg>';
+  const SPEAKER_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
+
+  const muteAllExcept = (keep) => {
+    cases.forEach(c => {
+      const v = c.querySelector('.phone__video');
+      if (v && v !== keep) { v.muted = true; const b = c.querySelector('.ph-sound'); if (b) b.innerHTML = SPEAKER_OFF; c.classList.remove('has-sound'); }
+    });
+  };
+
+  cases.forEach(card => {
+    const screen = card.querySelector('.phone__screen');
+    const video = card.querySelector('.phone__video');
+    if (!video || !screen) return;
+
+    const sound = document.createElement('button');
+    sound.className = 'ph-sound';
+    sound.setAttribute('aria-label', 'Звук');
+    sound.innerHTML = SPEAKER_OFF;
+    screen.appendChild(sound);
+
+    let pinned = false;
+
+    const play = () => video.play().then(() => card.classList.add('is-playing')).catch(() => {});
+    const stop = () => { video.pause(); card.classList.remove('is-playing'); };
+
+    const pauseOthers = () => cases.forEach(c => {
+      const v = c.querySelector('.phone__video');
+      if (v && v !== video) { v.pause(); c.classList.remove('is-playing'); }
+    });
+
+    sound.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (video.muted) {
+        muteAllExcept(video);
+        video.muted = false;
+        sound.innerHTML = SPEAKER_ON;
+        card.classList.add('has-sound');
+        pinned = true;
+        play();
+      } else {
+        video.muted = true;
+        sound.innerHTML = SPEAKER_OFF;
+        card.classList.remove('has-sound');
+      }
+    });
+
+    screen.addEventListener('click', () => {
+      if (video.paused) {
+        pauseOthers();
+        pinned = true;
+        play();
+      } else {
+        pinned = false;
+        stop();
+      }
+    });
+
+    if (!coarse) {
+      card.addEventListener('mouseenter', () => { if (video.paused) play(); });
+      card.addEventListener('mouseleave', () => { if (!pinned && !card.classList.contains('has-sound')) stop(); });
+    }
+
+    video.addEventListener('ended', () => { card.classList.remove('is-playing'); });
+  });
+})();
