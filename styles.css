@@ -2584,3 +2584,28 @@ body {
   color: #0E0E0C;
   border-color: var(--lime);
 }
+
+/* ===========================================================
+   FOOTNOTE — % от комментариев
+   =========================================================== */
+.metric__fn {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.34em;
+  font-weight: 600;
+  line-height: 0;
+  vertical-align: super;
+  margin-left: 3px;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.metric__note {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+  letter-spacing: 0.01em;
+}
+@media (max-width: 768px) {
+  .metric__note { font-size: 10px; margin-top: 6px; }
+}
